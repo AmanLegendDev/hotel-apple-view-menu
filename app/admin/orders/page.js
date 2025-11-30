@@ -186,7 +186,7 @@ export default function AdminOrdersPage() {
             </button>
 
             <h2 className="text-2xl font-bold text-[#d7b46a]">
-              Table {selectedOrder.table}
+              Room {selectedOrder.table}
             </h2>
             <p className="text-gray-400 text-sm mb-4">
               {new Date(selectedOrder.createdAt).toLocaleString()}

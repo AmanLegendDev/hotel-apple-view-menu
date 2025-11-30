@@ -88,7 +88,7 @@ export default function AdminNotification() {
           className="fixed top-6 right-6 bg-[#111] text-white px-5 py-4 rounded-xl shadow-xl border border-[#ff6a3d] z-[9999]"
         >
           <p className="font-semibold text-lg">
-            New Order • Table {current.table}
+            New Order • Room {current.table}
           </p>
 
           <p className="text-sm text-gray-300 mt-1">

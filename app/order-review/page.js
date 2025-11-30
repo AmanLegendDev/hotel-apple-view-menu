@@ -126,7 +126,7 @@ export default function OrderReviewPage() {
       {/* TABLE INPUT */}
       <div className="mb-5">
         <label className="font-semibold text-sm block mb-1">
-          Table Number <span className="text-red-500">*</span>
+          Room Number <span className="text-red-500">*</span>
         </label>
         <input
           type="number"
