@@ -2,9 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* GLOBAL RESET / BASE STYLES */
+
+
+
+/* -------------------------------
+   🍏 APPLE VIEW THEME VARIABLES
+-------------------------------- */
+:root {
+  --bg-cream: #f7f5ef;
+  --apple-green: #4caf50;
+  --apple-green-light: #33ac35;
+  --pine-brown: #5a4634;
+  --text-dark: #2d2d2d;
+}
+
+/* -------------------------------
+   GLOBAL RESET / BASE
+-------------------------------- */
 html, body {
-  @apply bg-[#0d0d0d] text-white antialiased;
+  @apply antialiased;
+  background: var(--bg-cream);
+  color: var(--text-dark);
 }
 
 /* Smooth scroll */
@@ -16,6 +34,49 @@ html {
 body {
   font-size: 16px;
 }
+
+/* -------------------------------
+   🍏 APPLE VIEW UNIVERSAL STYLE
+-------------------------------- */
+
+/* Luxury shadow */
+.apple-shadow {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+
+/* Golden border card */
+.apple-card {
+  border: 1px solid rgba(217,164,65,0.25); /* gold tint */
+  background: #ffffff;
+  border-radius: 16px;
+  transition: 0.25s ease;
+}
+
+.apple-card:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+}
+
+/* Category pill buttons */
+.apple-pill {
+  border: 1px solid rgba(10,106,59,0.30);
+  background: white;
+  color: var(--apple-green);
+  font-weight: 600;
+}
+
+.apple-pill-active {
+  background: var(--apple-green);
+  color: white;
+  border-color: var(--apple-green);
+}
+
+/* Apple gold price text */
+.price-apple {
+  color: var(--apple-gold);
+  font-weight: 700;
+}
+
 /* Hide scrollbar for Chrome, Safari, Edge */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

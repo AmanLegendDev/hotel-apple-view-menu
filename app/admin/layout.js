@@ -1,8 +1,6 @@
 "use client";
-import { useEffect } from "react";
-import { useState } from "react";
-import { redirect, usePathname } from "next/navigation";
-import AdminNotification from "@/app/component/AdminNotification";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
@@ -13,12 +11,10 @@ import {
   Menu,
   X,
   HomeIcon,
-  MenuIcon,
-  ListOrdered
+  ListOrdered,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation"; 
-
+import AdminNotification from "@/app/component/AdminNotification";
 
 export default function AdminLayout({ children }) {
   const { data: session, status } = useSession();
@@ -26,24 +22,16 @@ export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
 
- 
-useEffect(() => {
-  if (status === "loading") return;
+  useEffect(() => {
+    if (status === "loading") return;
 
-  if (!session || session.user.role !== "admin") {
-    router.replace("/login"); 
-  }
-}, [session, status]);
+    if (!session || session.user.role !== "admin") {
+      router.replace("/login");
+    }
+  }, [session, status]);
 
-if (status === "loading") return null;
+  if (status === "loading" || !session) return null;
 
-if (!session || session.user.role !== "admin") {
-  return null;
-}
-
-
-
-  // ⭐ FINAL SIDEBAR ROUTES
   const links = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Orders", href: "/admin/orders", icon: ListOrdered },
@@ -53,7 +41,7 @@ if (!session || session.user.role !== "admin") {
   ];
 
   return (
-    <div className="bg-[#0b0b0b] text-white flex">
+    <div className="bg-[#0c0c0c] text-white flex min-h-screen">
 
       {/* MOBILE OVERLAY */}
       {sidebarOpen && (
@@ -65,13 +53,14 @@ if (!session || session.user.role !== "admin") {
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-[#0f0f0f] border-r border-[#1f1f1f] p-6 flex flex-col z-40
-          transform transition-transform duration-300
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-64"}
-          md:translate-x-0
-        `}
+        className={`fixed top-0 left-0 h-screen w-64 
+        bg-[#0f0f0f]/90 backdrop-blur-xl border-r border-[#2a2a2a]
+        p-6 flex flex-col z-40 shadow-xl
+        transform transition-transform duration-300
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-64"}
+        md:translate-x-0`}
       >
-        {/* Close Button - Mobile */}
+        {/* Close Button */}
         <button
           onClick={() => setSidebarOpen(false)}
           className="md:hidden text-white mb-6 flex justify-end"
@@ -80,74 +69,77 @@ if (!session || session.user.role !== "admin") {
         </button>
 
         {/* LOGO */}
-        <h1 className="text-xl font-bold mb-10 tracking-wide">
-          Digital Menu Admin
+        <h1 className="text-2xl font-bold mb-12 tracking-wide text-[#d7b46a]">
+          Admin Panel ✨
         </h1>
 
         {/* LINKS */}
-        <div className="space-y-2 flex-1">
+        <nav className="space-y-2 flex-1">
           {links.map((link) => {
             const isActive = pathname === link.href;
-
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 p-2 rounded-lg transition
-                  ${isActive
-                    ? "bg-[#1a1a1a] text-white font-semibold border border-[#ff6a3d]"
-                    : "text-gray-300 hover:bg-[#1a1a1a] hover:text-white"
-                  }
-                `}
                 onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all select-none
+                ${
+                  isActive
+                    ? "bg-[#1a1a1a] border border-[#d7b46a] text-white shadow-md"
+                    : "text-gray-300 hover:bg-[#1a1a1a] hover:text-white"
+                }`}
               >
-                <link.icon size={20} />
+                <link.icon
+                  size={20}
+                  className={`${isActive ? "text-[#d7b46a]" : "text-gray-400"}`}
+                />
                 {link.name}
               </Link>
             );
           })}
-        </div>
+        </nav>
 
         {/* LOGOUT */}
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-3 p-2 rounded-lg hover:bg-red-600/20 text-gray-300 hover:text-white transition"
+          className="flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:bg-red-600/20 hover:text-white transition-all"
         >
           <LogOut size={20} /> Logout
         </button>
 
-        {/* EMAIL - Mobile */}
-        <p className="text-gray-500 text-xs mt-4 block md:hidden">
+        {/* EMAIL */}
+        <p className="text-gray-500 text-xs mt-4 hidden md:block">
           {session?.user?.email}
         </p>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <div className="flex-1 min-h-screen md:ml-64">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 md:ml-64">
 
         {/* TOP NAV */}
-        <div className="h-16 bg-[#0f0f0f]/80 backdrop-blur border-b border-[#1e1e1e]
+        <div
+          className="h-16 bg-[#0f0f0f]/70 backdrop-blur border-b border-[#2a2a2a]
           flex items-center justify-between px-6 sticky top-0 z-20 shadow-[0_2px_10px_rgba(0,0,0,0.3)]"
         >
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden text-white"
           >
-            <Menu size={30} />
+            <Menu size={28} />
           </button>
 
-          <h2 className="text-lg font-semibold tracking-wide">Admin Panel</h2>
+          <h2 className="text-lg font-semibold tracking-wide text-[#d7b46a]">
+            Hotel Apple View — Admin Dashboard
+          </h2>
 
-          {/* Email Desktop */}
           <p className="text-gray-400 text-sm hidden md:block">
             {session?.user?.email}
-          </p>  
+          </p>
         </div>
 
         {/* PAGE CONTENT */}
-       
-<AdminNotification />
-        <main className="p-5">{children}</main>
+        <AdminNotification />
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2, Trash2, Eye } from "lucide-react";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -8,16 +9,10 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  // -----------------------------
-  // LIVE POLLING FOR REALTIME
-  // -----------------------------
+  // 🔄 LIVE REFRESH EVERY 1 SEC
   useEffect(() => {
-    loadOrders(); // initial load
-
-    const interval = setInterval(() => {
-      loadOrders(); // every second
-    }, 1000);
-
+    loadOrders();
+    const interval = setInterval(loadOrders, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -27,40 +22,22 @@ export default function AdminOrdersPage() {
       const data = await res.json();
       setOrders(data.orders || []);
     } catch (err) {
-      console.log("Orders Fetch Error:", err);
+      console.log("Fetch error:", err);
     }
     setLoading(false);
   }
 
-  // -----------------------------
-  // DELETE ORDER
-  // -----------------------------
   async function deleteOrder(id) {
-    try {
-      await fetch(`/api/orders/${id}`, { method: "DELETE" });
-      setOrders((p) => p.filter((x) => x._id !== id));
-      setDeleteConfirm(null);
-    } catch (err) {
-      console.log("Delete error:", err);
-    }
+    await fetch(`/api/orders/${id}`, { method: "DELETE" });
+    setOrders((prev) => prev.filter((o) => o._id !== id));
+    setDeleteConfirm(null);
   }
 
-  // -----------------------------
-  // MARK ORDER AS SEEN (DB SYNC)
-  // -----------------------------
-  async function markSeen(orderId) {
-    try {
-      await fetch(`/api/orders/seen/${orderId}`, {
-        method: "PUT",
-      });
-    } catch (err) {
-      console.log("Seen error:", err);
-    }
+  async function markSeen(id) {
+    await fetch(`/api/orders/seen/${id}`, { method: "PUT" });
   }
 
-  // -----------------------------
-  // GROUP ORDERS
-  // -----------------------------
+  // GROUPING ORDERS
   function groupOrders(list) {
     const today = [];
     const yesterday = [];
@@ -72,10 +49,10 @@ export default function AdminOrdersPage() {
     const y = now.getFullYear();
 
     list.forEach((o) => {
-      const date = new Date(o.createdAt);
-      const dd = date.getDate();
-      const mm = date.getMonth();
-      const yy = date.getFullYear();
+      const dt = new Date(o.createdAt);
+      const dd = dt.getDate();
+      const mm = dt.getMonth();
+      const yy = dt.getFullYear();
 
       if (dd === d && mm === m && yy === y) today.push(o);
       else if (dd === d - 1 && mm === m && yy === y) yesterday.push(o);
@@ -87,23 +64,22 @@ export default function AdminOrdersPage() {
 
   const { today, yesterday, older } = groupOrders(orders);
 
-  // -----------------------------
-  // ORDER CARD
-  // -----------------------------
+  // 🔥 ORDER CARD — PREMIUM DARK GOLD
   function OrderCard({ o }) {
     const isNew = !o.seenByAdmin;
 
     return (
       <div
-        key={o._id}
-        className="relative bg-[#111] border border-gray-800 rounded-xl p-5 shadow hover:shadow-xl hover:border-[#ff6a3d] transition cursor-pointer"
+        className="group bg-[#111] border border-[#2a2a2a] rounded-xl p-5 shadow-lg 
+        hover:border-[#d7b46a] hover:shadow-[0_0_14px_rgba(215,180,106,0.25)] 
+        transition cursor-pointer relative"
         onClick={() => {
           setSelectedOrder(o);
-          if (isNew) markSeen(o._id); // update DB
+          if (isNew) markSeen(o._id);
         }}
       >
         {isNew && (
-          <span className="absolute bottom-3 right-4 bg-green-600 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+          <span className="absolute top-3 right-4 bg-[#d7b46a] text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg">
             NEW
           </span>
         )}
@@ -113,43 +89,44 @@ export default function AdminOrdersPage() {
             e.stopPropagation();
             setDeleteConfirm(o);
           }}
-          className="absolute right-3 top-3 text-red-400 hover:text-red-200 text-lg"
+          className="absolute right-3 bottom-3 text-red-400 hover:text-red-200 transition"
         >
-          🗑️
+          <Trash2 size={18} />
         </button>
 
-        <div>
-          <p className="text-sm text-gray-400 mb-2">
-            {new Date(o.createdAt).toLocaleString()}
-          </p>
+        <p className="text-gray-400 text-sm mb-2">
+          {new Date(o.createdAt).toLocaleString()}
+        </p>
 
-          <h2 className="text-xl font-bold mb-2 text-[#ff6a3d]">
-            Table {o.table}
-          </h2>
+        <h2 className="text-2xl font-bold text-[#d7b46a] mb-1">
+          Table {o.table}
+        </h2>
 
-          <p className="text-gray-300 mb-1">{o.totalQty} items</p>
-          <p className="font-bold text-lg text-white">₹{o.totalPrice}</p>
-        </div>
+        <p className="text-gray-300">{o.totalQty} items</p>
+        <p className="text-xl font-semibold text-white mt-1">
+          ₹{o.totalPrice}
+        </p>
       </div>
     );
   }
 
-  // -----------------------------
-  // UI
-  // -----------------------------
   return (
-    <div className="p-6 text-white">
+    <div className="p-6 text-white animate-fadeInSlow">
+      {/* HEADER */}
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold tracking-tight">Orders</h1>
-        <p className="text-gray-400 mt-1">Realtime restaurant orders</p>
+        <h1 className="text-3xl font-bold text-[#d7b46a]">Orders</h1>
+        <p className="text-gray-400 text-sm mt-1">Realtime restaurant orders</p>
       </div>
 
+      {/* LOADING */}
       {loading && (
-        <div className="text-center py-10 text-gray-400 text-lg">
-          Loading orders...
+        <div className="flex items-center gap-3 py-10 text-gray-400 justify-center">
+          <Loader2 className="animate-spin" size={22} />
+          Loading orders…
         </div>
       )}
 
+      {/* EMPTY */}
       {!loading && orders.length === 0 && (
         <div className="text-center py-12 text-gray-500 text-lg">
           No orders yet 😶
@@ -159,8 +136,8 @@ export default function AdminOrdersPage() {
       {/* TODAY */}
       {today.length > 0 && (
         <>
-          <h2 className="text-xl font-bold mt-6 mb-3">Today</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <h2 className="text-xl font-semibold text-[#d7b46a] mt-6 mb-3">Today</h2>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {today.map((o) => (
               <OrderCard key={o._id} o={o} />
             ))}
@@ -171,8 +148,10 @@ export default function AdminOrdersPage() {
       {/* YESTERDAY */}
       {yesterday.length > 0 && (
         <>
-          <h2 className="text-xl font-bold mt-10 mb-3">Yesterday</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <h2 className="text-xl font-semibold text-[#d7b46a] mt-10 mb-3">
+            Yesterday
+          </h2>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {yesterday.map((o) => (
               <OrderCard key={o._id} o={o} />
             ))}
@@ -183,8 +162,10 @@ export default function AdminOrdersPage() {
       {/* OLDER */}
       {older.length > 0 && (
         <>
-          <h2 className="text-xl font-bold mt-10 mb-3">Older</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <h2 className="text-xl font-semibold text-[#d7b46a] mt-10 mb-3">
+            Older
+          </h2>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {older.map((o) => (
               <OrderCard key={o._id} o={o} />
             ))}
@@ -192,10 +173,11 @@ export default function AdminOrdersPage() {
         </>
       )}
 
-      {/* MODAL */}
+      {/* ORDER DETAILS MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-[#111] w-[90%] max-w-lg rounded-xl border border-gray-800 p-6 relative shadow-xl">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[#111] w-[90%] max-w-lg rounded-xl border border-[#2a2a2a] shadow-xl p-6 relative">
+
             <button
               onClick={() => setSelectedOrder(null)}
               className="absolute right-4 top-3 text-gray-400 hover:text-white text-2xl"
@@ -203,7 +185,7 @@ export default function AdminOrdersPage() {
               ×
             </button>
 
-            <h2 className="text-2xl font-bold text-[#ff6a3d]">
+            <h2 className="text-2xl font-bold text-[#d7b46a]">
               Table {selectedOrder.table}
             </h2>
             <p className="text-gray-400 text-sm mb-4">
@@ -211,27 +193,24 @@ export default function AdminOrdersPage() {
             </p>
 
             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
-              {selectedOrder.items.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex justify-between border-b border-gray-800 pb-2"
-                >
+              {selectedOrder.items.map((it) => (
+                <div key={it._id} className="flex justify-between border-b border-gray-800 pb-2">
                   <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-gray-400">
-                      {item.qty} × ₹{item.price}
+                    <p className="font-semibold">{it.name}</p>
+                    <p className="text-gray-400 text-sm">
+                      {it.qty} × ₹{it.price}
                     </p>
                   </div>
-                  <p className="font-semibold text-[#ff6a3d]">
-                    ₹{item.qty * item.price}
+                  <p className="text-[#d7b46a] font-bold">
+                    ₹{it.qty * it.price}
                   </p>
                 </div>
               ))}
             </div>
 
             {selectedOrder.note && (
-              <p className="mt-4 p-3 bg-gray-900 rounded-lg text-gray-300 text-sm">
-                <span className="font-semibold text-white">Note:</span>{" "}
+              <p className="mt-4 p-3 bg-[#1a1a1a] rounded-lg text-gray-300">
+                <span className="font-bold text-white">Note: </span>
                 {selectedOrder.note}
               </p>
             )}
@@ -243,7 +222,7 @@ export default function AdminOrdersPage() {
 
             <button
               onClick={() => setSelectedOrder(null)}
-              className="w-full mt-6 bg-[#ff6a3d] py-3 rounded-xl font-semibold text-white hover:brightness-110 transition"
+              className="w-full mt-6 bg-[#d7b46a] py-3 rounded-xl text-black font-semibold hover:brightness-110 transition"
             >
               Close
             </button>
@@ -254,14 +233,14 @@ export default function AdminOrdersPage() {
       {/* DELETE MODAL */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-[#111] w-[90%] max-w-sm rounded-xl border border-gray-800 p-6 shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-red-400">
+          <div className="bg-[#111] w-[90%] max-w-sm rounded-xl border border-[#2a2a2a] p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-red-400 mb-4">
               Delete this order?
             </h2>
 
             <p className="text-gray-300 mb-6">
-              Are you sure you want to delete order for{" "}
-              <b>Table {deleteConfirm.table}</b>?
+              Are you sure you want to delete order for 
+              <b className="text-white"> Table {deleteConfirm.table}</b>?
             </p>
 
             <div className="flex gap-3">
@@ -282,6 +261,7 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
