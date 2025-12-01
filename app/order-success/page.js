@@ -80,7 +80,7 @@ export default function OrderSuccessPage() {
 
         <div className="mt-4 bg-[var(--apple-green)]/10 p-3 rounded-lg text-center">
           <p className="font-semibold">
-            room number Number:{" "}
+            Room Number:{" "}
             <span className="text-[var(--apple-green)] font-bold text-xl">
               {order.table}
             </span>

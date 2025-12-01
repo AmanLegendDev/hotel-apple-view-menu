@@ -12,26 +12,34 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        await connectDB();
+     async authorize(credentials) {
+  await connectDB();
 
-        const { email, password } = credentials;
+  const email = credentials?.email?.toLowerCase().trim();
+  const password = credentials?.password;
 
-        const user = await User.findOne({ email });
-        if (!user) throw new Error("User Not Found");
+  if (!email || !password) {
+    console.log("Credentials missing", credentials);
+    return null;
+  }
 
-        const isMatched = await bcrypt.compare(password, user.password);
-        if (!isMatched) throw new Error("Incorrect Password");
+  const user = await User.findOne({ email });
 
-        if (user.role !== "admin") throw new Error("Unauthorized");
+  if (!user) return null;
 
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
-      },
+  const isMatched = await bcrypt.compare(password, user.password);
+  if (!isMatched) return null;
+
+  if (user.role !== "admin") return null;
+
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+}
+
     }),
   ],
 

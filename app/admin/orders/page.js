@@ -99,7 +99,7 @@ export default function AdminOrdersPage() {
         </p>
 
         <h2 className="text-2xl font-bold text-[#d7b46a] mb-1">
-          Table {o.table}
+          Room {o.table}
         </h2>
 
         <p className="text-gray-300">{o.totalQty} items</p>

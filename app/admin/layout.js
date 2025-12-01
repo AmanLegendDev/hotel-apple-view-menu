@@ -129,7 +129,7 @@ export default function AdminLayout({ children }) {
           </button>
 
           <h2 className="text-lg font-semibold tracking-wide text-[#d7b46a]">
-            Hotel Apple View — Admin Dashboard
+            Admin Dashboard
           </h2>
 
           <p className="text-gray-400 text-sm hidden md:block">

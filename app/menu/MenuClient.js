@@ -98,7 +98,7 @@ export default function MenuClient({ categories, items, activeCategoryId }) {
       {recentOrder && (
         <div className="w-full bg-white shadow border-l-4 border-[var(--apple-green)] px-5 py-3 flex justify-between items-center mt-4 rounded-lg">
           <p className="font-semibold text-[var(--text-dark)]">
-            Last order • Table {recentOrder.table}
+            Last order • Room No : {recentOrder.table}
           </p>
           <button
             onClick={() => router.push("/order-success")}

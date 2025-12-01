@@ -38,7 +38,7 @@ export default function OrderReviewPage() {
 
   async function placeOrder() {
     if (!table) {
-      alert("Please enter table number!");
+      alert("Please enter Room number!");
       return;
     }
 
@@ -126,11 +126,11 @@ export default function OrderReviewPage() {
       {/* TABLE INPUT */}
       <div className="mb-5">
         <label className="font-semibold text-sm block mb-1">
-          Room Number <span className="text-red-500">*</span>
+          Room Number.? <span className="text-red-500">*</span>
         </label>
         <input
           type="number"
-          placeholder="Enter table number"
+          placeholder="Enter Room number"
           value={table}
           onChange={(e) => {
             setError("");

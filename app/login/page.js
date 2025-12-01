@@ -14,23 +14,30 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const email = e.target.email.value;
-    const password = e.target.password.value;
+    
+  const formData = new FormData(e.target);
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
+  const email = formData.get("email");
+  const password = formData.get("password");
 
-    setLoading(false);
+   const res = await signIn("credentials", {
+  redirect: false,
+  email,
+  password,
+  callbackUrl: "/admin",
+});
 
-    if (res?.error) {
-      setError(res.error);
-      return;
-    }
+setLoading(false);
 
-    if (res.ok) router.push("/admin");
+if (res?.error) {
+  setError(res.error);
+  return;
+}
+
+// FINAL FIX
+router.push("/admin");
+
+
 
   }
 

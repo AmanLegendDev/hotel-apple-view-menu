@@ -23,21 +23,35 @@ export default function NewItemPage() {
     setCategories(data);
   }
 
-  async function addItem() {
+ async function addItem() {
+  try {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("price", price);
     formData.append("description", desc);
     formData.append("category", category);
-    formData.append("image", image); // NEW file
+    if (image) formData.append("image", image);
 
-    await fetch("/api/items", {
+    const res = await fetch("/api/items", {
       method: "POST",
       body: formData,
     });
 
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("ADD ITEM ERROR:", data);
+      alert("Error: " + (data.error || "Something went wrong"));
+      return;
+    }
+
     router.push("/admin/items");
+  } catch (err) {
+    console.error("FRONTEND CATCH:", err);
+    alert("Frontend crash: " + err.message);
   }
+}
+
 
   return (
     <div className="p-6 text-white">
